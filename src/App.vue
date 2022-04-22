@@ -1,30 +1,55 @@
 <template>
-  <nav>
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
-  </nav>
-  <router-view/>
+  <div class="mapdiv"></div>
 </template>
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
+<script>
+import WebMap from "@arcgis/core/WebMap";
+import MapView from "@arcgis/core/views/MapView";
+import Bookmarks from "@arcgis/core/widgets/Bookmarks";
+import Expand from "@arcgis/core/widgets/Expand"; 
 
-nav {
-  padding: 30px;
-}
+export default {
+  name: 'App',
+  async mounted() {
+    const webmap = new WebMap({
+      portalItem: {
+        id: "aa1d3f80270146208328cf66d022e09c",
+      },
+    });
 
-nav a {
-  font-weight: bold;
-  color: #2c3e50;
-}
+    const view = new MapView({
+      // https://v3.vuejs.org/api/instance-properties.html#el
+      container: this.$el,
+      map: webmap,
+    });
 
-nav a.router-link-exact-active {
-  color: #42b983;
+    const bookmarks = new Bookmarks({
+      view: view,
+      // allows bookmarks to be added, edited, or deleted
+      editingEnabled: true,
+    });
+
+    const bkExpand = new Expand({
+      view: view,
+      content: bookmarks,
+      expanded: true,
+    });
+
+    // Add the widget to the top-right corner of the view
+    view.ui.add(bkExpand, "top-right");
+
+    // bonus - how many bookmarks in the webmap?
+    webmap.when(function () {
+      if (webmap.bookmarks && webmap.bookmarks.length) {
+        console.log("Bookmarks: ", webmap.bookmarks.length);
+      } else {
+        console.log("No bookmarks in this webmap.");
+      }
+    });
+  }
 }
+</script>
+
+<style scoped>
+  @import './main.css';
 </style>
